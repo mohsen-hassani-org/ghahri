@@ -73,13 +73,8 @@ class BookTimeManager(models.Manager):
 
     def create_whole_date_times(self, date):
         books = []
-        full = self.model.BookTypes.FULL_SERVICE
-        repr = self.model.BookTypes.REPAIR
         for time in self.model.TimesInDay.choices:
-            b1 = self.model(date=date, time_in_day=time[0], book_type=full)
-            b2 = self.model(date=date, time_in_day=time[0], book_type=repr)
-            books.append(b1)
-            books.append(b2)
+            books.append(self.model(date=date, time_in_day=time[0]))
         self.bulk_create(books)
 
     def create_today_times(self):

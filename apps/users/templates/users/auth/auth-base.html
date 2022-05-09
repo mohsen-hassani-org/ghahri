@@ -1,0 +1,39 @@
+{% load static %}
+<!doctype html>
+<html dir="rtl">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/front.css' %}" rel="stylesheet" />
+    {% block extra_head %}
+        <style>
+            input, select {
+                text-align: left;
+                outline: none;
+                width: 100%;
+                direction: ltr;
+            }
+        </style>
+    {% endblock %}
+    <script src="{% static 'js/tailwind.js' %}"></script>
+    </head>
+    <body>
+        <div class="h-screen flex">
+            <div class="flex w-1/2 i bg-cover bg-right justify-around items-center bg-[url('/static/bg.jpg')]">
+            <div>
+                <h1 class="text-white font-bold text-4xl">بیم‌سنج</h1>
+                <p class="text-white mt-1">پلتفرم محبوب و آسان مقایسه و خرید بیمه</p>
+                {% comment %} <button type="submit" class="block w-28 bg-white text-indigo-800 mt-4 py-2 rounded-2xl font-bold mb-2"></button> {% endcomment %}
+            </div>
+            </div>
+            <div class="flex w-1/2 justify-center items-center bg-white">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    {% block extra_script %}
+    {% endblock extra_script %}
+    </body>
+</html>

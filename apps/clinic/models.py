@@ -61,7 +61,7 @@ class Brand(AbstractModel):
 
     class Meta:
         verbose_name = 'نام برند'
-        verbose_name = 'نام برند'
+        verbose_name_plural = 'نام برند'
         
     def __str__(self):
         return f'{self.company.name} - {self.name}'
@@ -151,7 +151,7 @@ class BookTime(AbstractModel):
         unique_together = ('date', 'time_in_day')
 
     def __str__(self):
-        return f"{self.date} {self.get_time_in_day_display()} - {self.get_book_type_display()}"
+        return f"{self.date} {self.get_time_in_day_display()}"
 
         
 class Reservation(AbstractModel):

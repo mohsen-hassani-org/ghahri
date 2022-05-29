@@ -1,6 +1,7 @@
 from datetime import datetime
 from django import forms
 from django.contrib import admin
+from jalali_date import date2jalali
 from .models import (Medicine, Illness, Service, BookTime,
                      ReservationService, Reservation,
                      ReservationMedicine, ImageGallery,
@@ -42,9 +43,14 @@ class Brand(admin.ModelAdmin):
 
 @admin.register(BookTime)
 class BookTimeAdmin(admin.ModelAdmin):
-    list_display = ('date', 'time_in_day')
+    list_display = ('date_jalali', 'time_in_day')
     search_fields = ('date', 'time_in_day')
     list_filter = ('date', 'time_in_day')
+
+    def date_jalali(self, obj):
+        return date2jalali(obj.date).strftime("%Y/%m/%d")
+    date_jalali.short_description = 'تاریخ'
+
 
 @admin.register(ReservationService)
 class ReservationServiceAdmin(admin.ModelAdmin):
@@ -95,6 +101,7 @@ class ReservationAdmin(admin.ModelAdmin):
     list_filter = ('patient', 'book_time__date', 'visited_at')
     inlines = [ReservationServiceInline, ReservationMedicineInline,
                ImageGalleryInline, ]
+    autocomplete_fields = ('patient', 'book_time', )
 
 
 @admin.register(ImageGallery)

@@ -68,8 +68,7 @@ class User(AbstractUser, AbstractModel):
     phone_number = models.CharField(max_length=15, verbose_name='شماره تلفن ثابت', null=True, blank=True)
     current_illness = models.ManyToManyField('clinic.Illness', verbose_name='بیماری های فعلی',
                                                 related_name='patients', blank=True)
-    current_medicines = models.ManyToManyField('clinic.Medicine', verbose_name='داروهای مصرفی فعلی',
-                                                related_name='patients', blank=True)
+    current_medicines = models.TextField(verbose_name='داروهای مصرفی فعلی', null=True, blank=True)
     treatment_history = models.TextField(verbose_name='سوابق درمانی', null=True, blank=True)
     notes = models.TextField(verbose_name='یادداشت', null=True, blank=True)
     referral_code = models.CharField(verbose_name='کد معرف', max_length=10, default=None, unique=True, null=True)

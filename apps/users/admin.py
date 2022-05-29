@@ -42,4 +42,4 @@ class CustomUserAdmin(ModelAdminJalaliMixin, UserAdmin):
     )
     autocomplete_fields = ('career',)
     add_form = CustomUserCreationForm
-    
+    filter_horizontal = ('current_illness',) 

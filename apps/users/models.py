@@ -1,3 +1,4 @@
+from time import perf_counter
 from django.templatetags.static import static
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -62,9 +63,8 @@ class User(AbstractUser, AbstractModel):
     birth_date = models.DateField(verbose_name='تاریخ تولد', null=True, blank=True)
     gender = models.IntegerField(verbose_name='جنسیت', null=True, blank=True, choices=GenderTypes.choices)
     role = models.IntegerField(choices=Roles.choices, default=Roles.PATIENT, verbose_name='نقش')
-    marriage_status = models.IntegerField(choices=MarriageStatuses.choices,
-                                            default=MarriageStatuses.SINGLE,
-                                            verbose_name='وضعیت تاهل')
+    marriage_status = models.IntegerField(choices=MarriageStatuses.choices, null=True, blank=True,
+                                            default=MarriageStatuses.SINGLE, verbose_name='وضعیت تاهل')
     phone_number = models.CharField(max_length=15, verbose_name='شماره تلفن ثابت', null=True, blank=True)
     current_illness = models.ManyToManyField('clinic.Illness', verbose_name='بیماری های فعلی',
                                                 related_name='patients', blank=True)
@@ -72,6 +72,7 @@ class User(AbstractUser, AbstractModel):
     treatment_history = models.TextField(verbose_name='سوابق درمانی', null=True, blank=True)
     notes = models.TextField(verbose_name='یادداشت', null=True, blank=True)
     referral_code = models.CharField(verbose_name='کد معرف', max_length=10, default=None, unique=True, null=True)
+    avatar = models.ImageField(verbose_name='تصویر پروفایل', upload_to='users/avatars', null=True, blank=True)
     objects = CustomUserManager()
 
     REQUIRED_FIELDS = ["mobile", ]
@@ -135,6 +136,23 @@ class User(AbstractUser, AbstractModel):
     @property
     def total_referred_users(self):
         return self.referrals.count()
+
+    @property
+    def is_admin(self):
+        return self.role == self.Roles.ADMIN
+    
+    @property
+    def is_doctor(self):
+        return self.role == self.Roles.DOCTOR
+    
+    @property
+    def is_secretary(self):
+        return self.role == self.Roles.SECRETARY
+    
+    @property
+    def is_patient(self):
+        return self.role == self.Roles.PATIENT
+
 
 
 class Referral(AbstractModel):

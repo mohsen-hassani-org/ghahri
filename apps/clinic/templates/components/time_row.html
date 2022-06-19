@@ -1,0 +1,30 @@
+<tr id="{{time.time}}">
+    <td class="time-cell">
+        <div class="time-box">
+            <div class="time-text">{{time.time}}</div>
+            <div class="time-buttons">
+                <button class="cbutton mini-button green-hover" title="فعال کردن این ساعت"><i class="fa fa-check"></i></button>
+                <button class="cbutton mini-button red-hover" title="غیرفعال کردن این ساعت"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+    </td>
+    <td>
+        {% if time.locked %}
+            <div class="reserve-container closed">
+                غیرفعال
+            </div>
+        {% else %}
+            <div class="reserve-container">
+                {% for reserve in time.reservations.all %}
+                    <div class="reserve-box" id="timeRow{{reserve.id}}">
+                        <h4>{{ reserve.patient.display_name }}</h4>
+                        <h6>{{ reserve.get_requested_services }}</h6>
+                    </div>
+                {% endfor %}
+                {% if time.addable %}
+                    <div class="reserve-box new">+</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </td>
+</tr>

@@ -28,10 +28,13 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 ]
 THIRD_PARTY_APPS = [
     'django_extensions',
     'jalali_date',
+    'django_filters',
+    'imagekit',
 ]
 PROJECT_APPS = [
     'apps.core',
@@ -87,7 +90,7 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_URL = '/media/'
-
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -99,6 +102,10 @@ DATABASES = {
     }
 }
 
+DBBACKUP_STORAGE_OPTIONS = {
+    'location': 'backups',
+    'base_url': '/backups/',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -146,6 +153,8 @@ JALALI_DATE_DEFAULTS = {
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = 'auth:get_phone'
 
 try:
     from ghahri.local_settings import *

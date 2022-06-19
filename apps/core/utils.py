@@ -27,3 +27,12 @@ def generate_random_string(length: int = 5, use_upper=True, use_lower=True,
     if not chars:
         raise ValueError
     return ''.join(random.choices(chars, k=length))
+
+
+def persian_digits_to_english(string):
+    return (string
+            .replace('۰', '0').replace('۱', '1').replace('۲', '2')
+            .replace('۳', '3').replace('۴', '4').replace('۵', '5')
+            .replace('۶', '6').replace('۷', '7').replace('۸', '8')
+            .replace('۹', '9')
+    )

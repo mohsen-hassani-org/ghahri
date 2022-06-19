@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 {% load static i18n jalali_tags %}
 {% load model_list_tags %}
-{% load widget_tweaks %}
 
 
 {% block title %} {{block.super}} {{page_title}} {% endblock title %}
@@ -16,6 +15,37 @@
     </div>
 </div>
 <div class="clearfix"></div>
+
+<!-- FILTER BOX BEGIN -->
+{% if filter_class %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    <div id="filter_box">
+                        <form method="get">
+                            <div class="row">
+                                {% for field in filter_class.form.visible_fields %}
+                                    <div class="form-group col-sm-4 col-md-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <span class="glyphicon glyphicon-search"></span> {% trans 'جستجو' %}
+                            </button>
+                            <a class="btn btn-default" href="{{request.path}}">{% trans 'پاک کردن' %}</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+<!-- FILTER BOX END -->
+
+
 <div class="row">
     <div class="col-md-12">
         <div class="x_panel">
@@ -39,43 +69,16 @@
             </div>
             <div class="x_content">
 
-                <!-- FILTER BOX BEGIN -->
-                {% if filter %}
-                <div id="filter_box" class="{% if not request.GET %}hide{% endif %}">
-                    <form method="get">
-                        <div class="row">
-                            {% for field in filter.form.visible_fields %}
-                                <div class="form-group col-sm-4 col-md-3">
-                                {{ field.label_tag }}
-                                {% render_field field %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <button type="submit" class="btn btn-success">
-                            <span class="glyphicon glyphicon-search"></span> {% trans 'جستجو' %}
-                        </button>
-                        <a class="btn btn-default" href="{{request.path}}">{% trans 'پاک کردن' %}</a>
-                    </form>
-                </div>
-                {% endif %}
-                <!-- FILTER BOX END -->
+               
 
                 {% if header_buttons %}
                     <div class="">
                         {% for btn in header_buttons %}
                         <a tabindex="{{forloop.counter0}}"
                             class="btn btn-default buttons-html5 {{btn.class}}"
-                            {% if btn.url_arg3 %}
-                            href="{% url btn.url_name btn.url_arg3 btn.url_arg2 btn.url_arg1 %}"
-                            {% elif btn.url_arg2 %}
-                            href="{% url btn.url_name btn.url_arg2 btn.url_arg1 %}"
-                            {% elif btn.url_arg1 %}
-                            href="{% url btn.url_name btn.url_arg1 %}"
-                            {% else %}
-                            href="{% url btn.url_name %}"
-                            {% endif %}>
+                            href="{{btn.url}}"
                             {% if btn.fa_icon_name %}
-                            <i class="fa fa-{{btn.fa_icon_name}}"></i>
+                            <i class="fa {{btn.fa_icon}}"></i>
                             {% endif %}
                             <span>{{btn.title}}</span>
                         </a>
@@ -89,8 +92,8 @@
                         <thead>
                             <tr class="headings">
                                 <th class="column-title">#</th>
-                                {% for header in headers %}
-                                <th class="column-title">{{ header }}</th>
+                                {% for field in fields %}
+                                <th class="column-title">{{ items.query.model|get_verbose_name:field }}</th>
                                 {% endfor %}
                                 <th class="column-title">{% trans 'عملیات' %}</th>
                             </tr>
@@ -102,21 +105,12 @@
                             <tr class="even pointer">
                                 <td class=" ">{{forloop.counter}}</td>
                                 {% for field in fields %}
-                                    <td class="column-title"><span>{{ item|get_object_item:field }}</span></td>
+                                    <td class="column-title"><span>{% get_view_item item field view %}</span></td>
                                 {% endfor %}
                                 <td class=" last">
                                     {% for action_button in action_buttons %}
                                     <a 
-                                        {% if action_button.arg3_field %}
-                                        href="{% url action_button.url_name item|get_object_item:action_button.arg1_field item|get_object_item:action_button.arg2_field item|get_object_item:action_button.arg1_field %}"
-                                        {% elif action_button.arg2_field %}
-                                        href="{% url action_button.url_name item|get_object_item:action_button.arg1_field item|get_object_item:action_button.arg2_field %}"
-                                        {% elif action_button.arg1_field %}
-                                        href="{% url action_button.url_name item|get_object_item:action_button.arg1_field %}"
-                                        {% else %}
-                                        href="{% url action_button.url_name %}"
-                                        {% endif %}
-
+                                        href="{% url action_button.url_name item|get_object_item:action_button.arg_field %}"
                                         {% if action_button.new_tab %}
                                         target="_blank"
                                         {% endif %}
@@ -125,7 +119,7 @@
                                         {% if action_button.class %}{{action_button.class}}{% endif %}
                                         {% if action_button.class_from_field %}{{item|get_object_item:action_button.class_from_field}}{% endif %}
                                         ">
-                                        {% if action_button.fa_icon_name %}<i class="fa fa-{{ action_button.fa_icon_name }}"></i> {% endif %}
+                                        {% if action_button.fa_icon %}<i class="fa {{action_button.fa_icon}}"></i> {% endif %}
                                         {{ action_button.title }}</a>
                                     {% endfor %}
                                     {% if delete_button_url_name %}
@@ -172,16 +166,16 @@
                             </tr>
                             {% endfor %}
                             {% if extra_rows %}
-                                <tr><td colspan="{{headers|length|add:2}}"></td></tr>
+                                <tr><td colspan="{{fields|length|add:2}}"></td></tr>
                                 {% for row in extra_rows %}
                                 <tr>
-                                    <td colspan="{{headers|length|add:1}}"></td>
+                                    <td colspan="{{fields|length|add:1}}"></td>
                                     <td><strong>{{row.title}}: {{row.value}}</strong></td></tr>
                                 {% endfor %}
                             {% endif %}
                         {% else %}
                             <tr>
-                                <td colspan="{{headers|length|add:2}}">
+                                <td colspan="{{fields|length|add:2}}">
                                     <p class="text-center">{% trans 'هیچ اطلاعاتی وجود ندارد!' %}</p>
                                 </td>
                             </tr>

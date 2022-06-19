@@ -15,19 +15,20 @@
     <link rel="icon" href="{% static "build/images/favicon.ico" %}" type="image/ico" />
     <title> {% block title %} {% trans 'پنل مدیریت' %} | {{settings.site_settings}} {% endblock title %}  </title>
 
+    <!-- select 2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <!-- Bootstrap -->
     <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Persian DatePicker -->
+    <link rel="stylesheet" href="{% static 'css/persian-datepicker.min.css' %}"/>
+
     {% if BIDI %}
     <link href="{% static "css/bootstrap-rtl.min.css" %}" rel="stylesheet">
     {% endif %}
     <!-- Font Awesome -->
     <link href="{% static "css/font-awesome.min.css" %}" rel="stylesheet">
-
-   <!-- jQuery -->
-    <link rel="stylesheet" href="{% static 'css/persian-datepicker.min.css' %}"/>
-    <script src="{% static "js/jquery.min.js" %}"></script>
-    <script src="{% static 'js/persian-date.min.js' %}"></script>
-    <script src="{% static 'js/persian-datepicker.min.js' %}"></script>
 
     <!-- iziToast -->
     <link rel="stylesheet" href="{% static 'css/iziToast.min.css' %}">
@@ -128,6 +129,8 @@
     {% endif %}
     <link rel="stylesheet" href="{% static 'admin/jquery.ui.datepicker.jalali/themes/base/jquery-ui.min.css' %}">
 
+    <link href="{% static 'css/project.css' %}" rel="stylesheet">
+
 
     {% block extra_head %}{% endblock %}
     
@@ -135,12 +138,16 @@
 <!-- /header content -->
 
 <body class="nav-md">
+    <div id="generalLoader">
+        <div class="lds-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    </div>
+
     <div class="container body">
         <div class="main_container">
             <div class="col-md-3 left_col hidden-print">
                 <div class="left_col scroll-view">
                     <div class="navbar nav_title" style="border: 0;">
-                        <a href="index.html" class="site_title">
+                        <a href="" class="site_title">
                             <i class="fa fa-institution"></i>
                             <small>
                                 {% trans 'پنل مدیریت' %}
@@ -168,16 +175,7 @@
                                             <p>{{ user.first_name }} {{ user.last_name }}</p>
                                         </div>
                                         <div class="sidebar-profile-footer hidden-small">
-                                            <a data-toggle="tooltip" data-placement="top" title=""
-                                                href="{% url 'account_profile' %}"
-                                                data-original-title="{% trans 'پروفایل کاربری' %}">
-                                                <i class="fa fa-user" aria-hidden="true"></i>
-                                            </a>
-                                            <a data-toggle="tooltip" data-placement="top" title=""
-                                                href="{% url 'account_logout' %}"
-                                                data-original-title="{% trans 'خروج' %}">
-                                                <i class="fa fa-power-off" aria-hidden="true"></i>
-                                            </a>
+                                            <span>{{user.get_role_display}}</span>
                                             <div class="clearfix"></div>
                                         </div>
                                     </div>
@@ -188,77 +186,51 @@
 
                                 <!-- WEBSITE HOME PAGE BEGIN-->
                                 <li>
-                                    <a href="{% url 'account_profile' %}"><i class="fa fa-dashboard"></i>{% trans 'داشبورد' %}</a>
+                                    <a href="{% url 'clinic:clinic' %}"><i class="fa fa-dashboard"></i>{% trans 'داشبورد کلینیک' %}</a>
                                 </li>
                                 <!-- WEBSITE HOME PAGE END -->
 
-                                <!-- ACCOUNT APP BEGIN -->
-                                {% if perms.accounts %}
+                                <!-- USERS BEGIN-->
                                 <li>
-                                    <a><i class="fa fa-users"></i>{% trans 'مدیریت کاربران' %}<span
+                                    <a href="{% url 'users:user_list' %}"><i class="fa fa-users"></i>{% trans 'کاربران سایت' %}</a>
+                                </li>
+                                <!-- USERS END -->
+
+                                <!-- CLINIC BEGIN -->
+                                {% if request.user.is_staff %}
+                                <li>
+                                    <a><i class="fa fa-gears"></i>کلینیک<span
                                             class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu">
-                                        <li><a href="{% url 'account_manage_user_list' %}">{% trans 'کاربران' %}</a>
-                                        </li>
-                                        <li><a href="{% url 'account_manage_group_list' %}">{% trans 'گروه‌ها' %}</a>
-                                        </li>
-                                        <li><a href="{% url 'account_manage_settings' %}">{% trans 'تنظیمات' %}</a>
+                                        <li><a href="{% url 'clinic:book_time_list' %}">نوبت‌ها</a></li>
+                                        <li><a href="{% url 'users:patient_list' %}">مراجعین</a></li>
+                                        <li><a href="{% url 'clinic:service_list' %}">سرویس‌ها</a></li>
+                                        <li><a href="{% url 'clinic:illness_list' %}">بیماری‌ها</a></li>
+                                        <li><a href="{% url 'clinic:medicine_list' %}">داروها</a></li>
+                                        <li><a href="{% url 'clinic:brand_company_list' %}">شرکت‌های تولید کننده</a></li>
+                                        <li><a href="{% url 'clinic:brand_list' %}">برند‌ها</a></li>
+                                    </ul>
+                                </li>
+                                {% endif %}
+                                <!-- CLINIC END -->
+ 
+                                <!-- CORE APP BEGIN -->
+                                {% if request.user.is_staff %}
+                                <li>
+                                    <a><i class="fa fa-gears"></i>{% trans 'سیستم' %}<span
+                                            class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu">
+                                        <li><a href="{% url 'core:backups' %}">{% trans 'فایل‌های پشتیبان' %}</a>
                                         </li>
                                     </ul>
                                 </li>
                                 {% endif %}
-                                <!-- ACCOUNT APP END -->
+                                <!-- CORE APP END -->
                                 
-                                <!-- TEAM BEGIN -->
-                                <li>
-                                    <a href="{% url 'team_profile_teams_mine' %}"><i class="fa fa-users"></i>{% trans 'تیم‌ها' %}</a>
-                                </li>
-                                <!-- TEAM END -->
-
-                                <!-- FILE APP BEGIN -->
-                                {% if perms.file %}
-                                <li>
-                                    <a><i class="fa fa-archive"></i>{% trans 'فایل‌ها' %}<span
-                                            class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-                                        <li><a href="{% url 'file_manage_file_list' %}">{% trans 'لیست فایل‌ها' %}</a>
-                                        <li><a href="{% url 'file_manage_file_upload' %}">{% trans 'بارگذاری فایل' %}</a>
-                                        </li>
-                                    </ul>
-                                </li>
-                                {% endif %}
-                                <!-- FILE APP END -->
-
 
                             </ul>
                         </div>
 
-                        <div class="menu_section">
-                            <h3>{% trans 'تیم‌های شما' %}</h3>
-                            {% if request.user.teams.all %}
-                            <ul class="nav side-menu">
-
-                                {% for team in request.user.teams.all %}
-                                <li>
-                                    <a><i class="fa fa-users"></i>{{team.name}}<span
-                                            class="fa fa-chevron-down"></span></a>
-                                    <ul class="nav child_menu">
-                                        <li><a href="{% url 'team_profile_teams_view' team.id %}">{% trans 'مشاهده' %}</a></li>
-                                        <li><a href="{% url 'team_profile_attendance_view_today' team.id %}">{% trans 'حضور و غیاب' %}</a></li>
-                                        <li><a href="{% url 'dmo_profile_dmo_view_this_month' team.id %}">{% trans 'DMO' %}</a></li>
-                                        <li><a href="{% url 'cfd_profile_signals_month_view' team.id %}">{% trans 'CFD' %}</a></li>
-                                        <li><a href="{% url 'team_profile_meetings_list' team.id %}">{% trans 'جلسات' %}</a></li>
-                                        <li><a href="{% url 'team_profile_votes_list' team.id %}">{% trans 'نظرسنجی' %}</a></li>
-                                        {% if request.user == team.leader %}
-                                        <li><a href="{% url 'dmo_profile_team_settings' team.id %}">{% trans 'تنظیمات DMO' %}</a></li>
-                                        {% endif %}
-                                    </ul>
-                                </li>
-                                {% endfor %}
-                                <!-- ACCOUNT APP END -->
-                            </ul>
-                            {% endif %}
-                        </div>
                     </div>
                     <!-- /sidebar menu -->
                 </div>
@@ -273,19 +245,10 @@
                         </div>
 
                         <ul class="nav navbar-nav navbar-right">
-                            <li class="">
-                                <form action="{% url 'set_language' %}" method="post" class="language-form">{% csrf_token %}
-                                    <input name="next" type="hidden" value="{{ redirect_to }}">
-                                    <select name="language" onchange="this.form.submit()" class="mobile-input">
-                                        {% get_language_info_list for LANGUAGES as languages %}
-                                        {% for language in languages %}
-                                        <option value="{{ language.code }}"
-                                            {% if language.code == LANG %} selected {% endif %}>
-                                            {{language.name_local}}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
+                            <li>
+                                <a data-toggle="tooltip" data-placement="top" title="" href="/auth/logout/" data-original-title="خروج">
+                                    <i class="fa fa-power-off" aria-hidden="true"></i>
+                                </a>
                             </li>
                        </ul>
                     </nav>
@@ -310,10 +273,21 @@
         </div>
     </div>
 
+
+   <!-- jQuery -->
+    <script src="{% static "js/jquery.min.js" %}"></script>
+
+    <!-- Django Jalali -->
     <script src="{% static "admin/js/django_jalali.min.js" %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Bootstrap -->
     <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+    <!-- Persian DatePicker -->
+    <script src="{% static 'js/persian-date.min.js' %}"></script>
+    <script src="{% static 'js/persian-datepicker.min.js' %}"></script>
 
     <!-- Custom Theme Scripts -->
     <script src="{% static "js/custom.min.js" %}"></script>
@@ -332,6 +306,20 @@
             iconColor: TOAST_LEVEL_FGS['{{message.level}}'],
             });
         {% endfor %}
+
+        $(document).ready(function() {
+            hideGeneralLoading();
+        });
+
+
+        function showGeneralLoading() {
+          $('#generalLoader').show();
+        }
+
+        function hideGeneralLoading() {
+          $('#generalLoader').hide();
+        }
+
     </script>
 
     <!-- Extra Scripts -->

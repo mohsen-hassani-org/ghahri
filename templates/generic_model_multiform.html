@@ -188,11 +188,10 @@
                         </button>
                     {% endif %}
 
-                    {% if form_cancel_url_name %}
-                    <a {% if form_cancel_url_arg1 %} href="{% url form_cancel_url_name form_cancel_url_arg1 %}" {% else %}
-                        href="{% url form_cancel_url_name %}" {% endif %} class="btn btn-default">
-                        {% if form_cancel_btn_text %}
-                        {{form_cancel_btn_text}}
+                    {% if cancel_url %}
+                    <a  href="{{cancel_url}}" class="btn btn-default">
+                        {% if cancel_btn_text %}
+                        {{cancel_btn_text}}
                         {% else %}
                         {% trans 'انصراف' %}
                         {% endif %}
@@ -210,7 +209,7 @@
     window.onload = () => {
         pdatepickers.map((picker) => {
             console.log(picker);
-            $("#id_" + picker).pDatepicker({
+            $("#id_" + picker).persianDatepicker({
                 calendarType: 'gregorian',
                 format: 'YYYY-MM-DD HH:mm:ss',
             });

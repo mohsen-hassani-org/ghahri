@@ -1,11 +1,15 @@
-from datetime import datetime
-from tabnanny import verbose
+from datetime import datetime, timedelta
 from django.db import models
+from django.db.models import F, Value
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 from apps.core.models import AbstractModel
 
 
 class Medicine(AbstractModel):
     name = models.CharField(max_length=100, verbose_name='نام دارو')
+    brand = models.ForeignKey('clinic.Brand', verbose_name='برند', on_delete=models.PROTECT,
+                              related_name='medicines', null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
 
     class Meta:
@@ -33,7 +37,7 @@ class Illness(AbstractModel):
 class Service(AbstractModel):
     name = models.CharField(max_length=100, verbose_name='نام خدمت')
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
-    price = models.IntegerField(verbose_name='قیمت (تومان)')
+    price = models.IntegerField(verbose_name='قیمت (تومان)', default=0)
 
     class Meta:
         verbose_name = 'خدمت'
@@ -46,6 +50,7 @@ class Service(AbstractModel):
     
 class BrandCompany(AbstractModel):
     name = models.CharField(max_length=255, verbose_name='شرکت سازنده برند')
+    description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
 
     class Meta:
         verbose_name = 'شرکت سازنده برند'
@@ -56,15 +61,18 @@ class BrandCompany(AbstractModel):
 
 class Brand(AbstractModel):
     company = models.ForeignKey(BrandCompany, related_name='brands', on_delete=models.PROTECT,
-                                verbose_name='شرکت')
+                                verbose_name='شرکت', null=True, blank=True)
     name = models.CharField(max_length=255, verbose_name='نام برند')  
+    description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
 
     class Meta:
         verbose_name = 'نام برند'
         verbose_name_plural = 'نام برند'
         
     def __str__(self):
-        return f'{self.company.name} - {self.name}'
+        if self.company:
+            return f'{self.name} ({self.company.name})'
+        return self.name
 
 
 class BookTimeManager(models.Manager):
@@ -75,11 +83,35 @@ class BookTimeManager(models.Manager):
         books = []
         for time in self.model.TimesInDay.choices:
             books.append(self.model(date=date, time_in_day=time[0]))
-        self.bulk_create(books)
+        self.bulk_create(books, ignore_conflicts=True)
 
     def create_today_times(self):
         today = datetime.today().date()
         self.create_whole_date_times(today)
+
+    def get_or_create_between_dates(self, start_date, end_date):
+        days = (end_date - start_date).days
+        date = start_date
+        dates = {}
+        for day in range(days):
+            date = start_date + timedelta(days=day)
+            self.create_whole_date_times(date)
+            dates[date] = self.filter(date=date).values('id', 'time_in_day', 'locked').order_by('time_in_day')
+        return dates
+
+    def unlock_times(self, ids):
+        self.filter(id__in=ids).update(locked=False)
+
+    def lock_times_between_dates(self, start_date, end_date):
+        self.filter(date__gte=start_date, date__lte=end_date).update(locked=True)
+
+    def get_services_for_date(self, date):
+        return self.filter(date=date).annotate(
+            time=F('time_in_day'),
+            addable=Value(False, output_field=models.BooleanField())
+        )
+
+
 
     
 class BookTime(AbstractModel):
@@ -141,13 +173,13 @@ class BookTime(AbstractModel):
 
     date = models.DateField(verbose_name='تاریخ', default=datetime.now)
     time_in_day = models.CharField(max_length=4, choices=TimesInDay.choices, verbose_name='ساعت')
-
+    locked = models.BooleanField(default=True, verbose_name='قفل شده')
     objects = BookTimeManager()
 
     class Meta:
         verbose_name = 'زمان رزرو'
         verbose_name_plural = 'زمان رزرو'
-        ordering = ('-id', )
+        ordering = ('time_in_day', )
         unique_together = ('date', 'time_in_day')
 
     def __str__(self):
@@ -173,6 +205,17 @@ class Reservation(AbstractModel):
     def __str__(self):
         return f"{self.patient} - {self.book_time}"
 
+    def get_requested_services(self):
+        return ', '.join([service.name for service in self.requested_services.all()])
+
+    @property
+    def is_visited(self):
+        return self.visited_at is not None
+
+    @property
+    def total_price(self):
+        return sum(self.services.values_list('final_price', flat=True))
+    
 
 class ImageGallery(AbstractModel):
 
@@ -183,12 +226,16 @@ class ImageGallery(AbstractModel):
         MEANTIME = 3, 'در مدت درمان'
         
     image = models.ImageField(verbose_name='تصویر', upload_to='gallery/')
-    user = models.ForeignKey('users.User', verbose_name='کاربر', on_delete=models.PROTECT)
+    image_thumbnail = ImageSpecField(source='image',
+                                    processors=[ResizeToFill(180, 180)],
+                                    format='JPEG',
+                                    options={'quality': 60})
+    user = models.ForeignKey('users.User', verbose_name='کاربر', on_delete=models.PROTECT, related_name="images")
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     capture_time = models.IntegerField(choices=CaptureTimes.choices, default=CaptureTimes.UNDEFINED,
                                        verbose_name='زمان')
     reservation = models.ForeignKey(Reservation, verbose_name='رزرو', on_delete=models.PROTECT,
-                                    null=True, blank=True)
+                                    null=True, blank=True, related_name='images')
 
     def __str__(self):
         time = self.get_capture_time_display()
@@ -199,10 +246,9 @@ class ReservationService(AbstractModel):
                                     related_name='services')
     service = models.ForeignKey('clinic.Service', verbose_name='خدمت', on_delete=models.PROTECT,
                                 related_name='reservation_services')
-    service_brand = models.CharField(max_length=255, verbose_name='برند خدمت', null=True, blank=True)
     brand = models.ForeignKey(Brand, verbose_name='برند', on_delete=models.PROTECT,
                               related_name='reservations', null=True, blank=True)
-    service_amount = models.CharField(max_length=100, verbose_name='میزان استفاده شده', null=True, blank=True)
+    amount = models.CharField(max_length=100, verbose_name='میزان استفاده شده', null=True, blank=True)
     description = models.TextField(null=True, blank=True, verbose_name='توضیحات')
     final_price = models.DecimalField(max_digits=9, decimal_places=0, verbose_name='قیمت نهایی')
 
@@ -213,7 +259,11 @@ class ReservationService(AbstractModel):
     def __str__(self):
         return f"{self.service.name} - {self.service_brand}"
 
+    @property
+    def service_name(self):
+        return self.service.name
     
+
 class ReservationMedicine(AbstractModel):
     reservation = models.ForeignKey(Reservation, verbose_name='رزرو', on_delete=models.PROTECT,
                                     related_name='medicines')

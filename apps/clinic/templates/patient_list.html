@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load jalali_tags %}
+
+{% block extra_head %}
+    <style>
+        
+    </style>
+{% endblock extra_head %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="book-time-container">
+                <div class="header">
+                    <div class="title">
+                    </div>
+                    <div class="date">
+                    </div>
+                </div>
+                <div class="body">
+                    
+                </div>
+            </div>
+            <div class="form">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="reservation_time_ids" id="reservationTimeIds" value="">
+                    <input type="submit" class="btn btn-primary" value="ثبت رزرو">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock page_content %}
+
+
+{% block extra_scripts %}
+
+<script>
+    $(document).ready(function () {
+
+
+    });
+</script>
+
+{% endblock extra_scripts %}

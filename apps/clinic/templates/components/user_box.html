@@ -1,0 +1,65 @@
+<div class="action-box quick-user">
+    <h4>افزودن سریع پرونده</h4>
+    <input type="text" name="first_name" id="firstNameForm" placeholder="نام">
+    <div class="inline-error" id="first_name_error"></div>
+    <input type="text" name="last_name" id="lastNameForm" placeholder="نام خانوادگی">
+    <div class="inline-error" id="last_name_error"></div>
+    <input type="text" name="mobile" id="mobileForm" placeholder="شماره موبایل">
+    <div class="inline-error" id="mobile_error"></div>
+    <div class="footer">
+        <div class="info"></div>
+        <div class="buttons">
+            <button class="cbutton green-hover" onclick="createUser()">
+                <i class="fa fa-check"></i> ایجاد پرونده
+            </button>
+        </div>
+    </div>
+    <div class="clear"></div>
+</div>
+
+
+<script>
+    function createUser() {
+        showGeneralLoading();
+        hideQuickUserFormErrors();
+
+        var firstName = $('#firstNameForm').val();
+        var lastName = $('#lastNameForm').val();
+        var mobile = $('#mobileForm').val();
+
+        $.ajax({
+            url: '/clinic/api/user/create/',
+            type: 'POST',
+            data: {
+                first_name: firstName,
+                last_name: lastName,
+                mobile: mobile,
+                csrfmiddlewaretoken: '{{csrf_token}}',
+            },
+            success: function (data) {
+                showSuccessMessage('پرونده با موفقیت ایجاد شد.');
+                reloadPageIn(1000);
+            },
+            error: function (data) {
+                for (let error in data.responseJSON.errors) {
+                    $('#' + error + '_error').html(data.responseJSON.errors[error][0]);
+                }
+            },
+            complete: function () {
+                hideGeneralLoading();
+            }
+        });
+    }
+
+    function hideQuickUserFormErrors() {
+        $('#first_name_error').html('');
+        $('#last_name_error').html('');
+        $('#mobile_error').html('');
+    }
+
+    function reloadPageIn(time) {
+        setTimeout(function () {
+            window.location.reload();
+        }, time);
+    }
+</script>

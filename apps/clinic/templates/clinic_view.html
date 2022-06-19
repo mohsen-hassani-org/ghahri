@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static jalali_tags %}
+
+
+
+{% block extra_head %}
+{% endblock extra_head %}
+
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-3">
+            <div class="action-box-container">
+                {% include 'components/date_picker_box.html' %} 
+                {% include 'components/user_box.html' %} 
+                {% include 'components/reservation_box.html' %} 
+               
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="time-container">
+                <table class="time-table">
+                    <tbody>
+                        {% for time in times %}
+                            {% include 'components/time_row.html' with time=time %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock page_content %}
+
+
+
+{% block extra_scripts %}
+    <script>
+        let picker;
+        $(document).ready(function() {
+
+            $('#timeForm').select2();
+            $('#userForm').select2();
+            $('#serviceForm').select2();
+
+
+            picker = $("#datepicker").pDatepicker({
+                "inline": true,
+                "format": "D MMMM YYYY",
+                "viewMode": "day",
+                "initialValue": true,
+                "minDate": 1647850000000,
+                "autoClose": false,
+                "position": "auto",
+                "altFormat": "D MMMM YYYY",
+                "altField": "#selectedDate",
+                "onlySelectOnDate": true,
+                "calendarType": "persian",
+                "calendar": {
+                  "persian": {
+                    "locale": "fa",
+                    "showHint": false,
+                    "leapYearMode": "algorithmic"
+                  },
+                },
+                "navigator": {
+                    "text": {
+                      "btnNextText": ">",
+                      "btnPrevText": "<"
+                    }
+                },
+                "toolbox": {
+                  "enabled": false,
+                },
+                "timePicker": {
+                  "enabled": false,
+                },
+                "dayPicker": {
+                  "enabled": true,
+                  "titleFormat": "YYYY MMMM"
+                },
+                "monthPicker": {
+                  "enabled": true,
+                  "titleFormat": "YYYY"
+                },
+                "yearPicker": {
+                  "enabled": true,
+                  "titleFormat": "YYYY"
+                },
+                "onSelect": selectDate,
+            });
+        });
+
+        $('.selectable-box').click(function () {
+            $('.selectable-box').removeClass('active');
+            $(this).addClass('active');
+        });
+
+
+        function selectDate(selectedDate) {
+          var d = picker.getState().selected.date
+          var m = picker.getState().selected.month
+          var y = picker.getState().selected.year
+          window.location.href = `/clinic/?year=${y}&month=${m}&day=${d}`;
+        }
+    </script>
+
+{% endblock extra_scripts %}

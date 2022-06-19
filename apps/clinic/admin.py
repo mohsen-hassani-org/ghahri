@@ -54,9 +54,9 @@ class BookTimeAdmin(admin.ModelAdmin):
 
 @admin.register(ReservationService)
 class ReservationServiceAdmin(admin.ModelAdmin):
-    list_display = ('reservation', 'service', 'service_brand', 'brand', 'service_amount', 'description', 'final_price')
-    search_fields = ('reservation', 'service', 'service_brand', 'brand', 'service_amount', 'description', 'final_price')
-    list_filter = ('reservation', 'service', 'service_brand', 'brand', 'service_amount', 'description', 'final_price')
+    list_display = ('reservation', 'service', 'brand', 'amount', 'description', 'final_price')
+    search_fields = ('reservation', 'service', 'brand', 'amount', 'description', 'final_price')
+    list_filter = ('reservation', 'service', 'brand', 'amount', 'description', 'final_price')
     autocomplete_fields = ('reservation', 'service', 'brand')
 
 @admin.register(ReservationMedicine)

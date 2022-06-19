@@ -49,7 +49,7 @@ class LoginPasswordView(FormView):
     def form_valid(self, form):
         login(self.request, form.get_user())
         del self.request.session['mobile']
-        return HttpResponseRedirect(reverse('users:dashboard'))
+        return HttpResponseRedirect(reverse('clinic:clinic'))
 
     def form_invalid(self, form):
         return super().form_invalid(form)

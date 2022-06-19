@@ -11,6 +11,8 @@ django-debug-toolbar = "*"
 python-dotenv = "*"
 django-jalali-date = "*"
 pillow = "*"
+django-filter = "*"
+django-imagekit = "*"
 
 [dev-packages]
 

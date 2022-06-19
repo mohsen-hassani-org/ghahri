@@ -1,0 +1,67 @@
+<div class="action-box quick-reservation">
+    <h4>ایجاد نوبت جدید</h4>
+    <select name="user" id="userForm">
+        {% for user in patients %}
+            <option value="{{user.id}}">{{user.get_full_name}} ({{user.mobile}})</option>
+        {% endfor %}
+    </select>
+    <div class="inline-error" id="patient_error"></div>
+    <select name="time" id="timeForm">
+        {% for time in available_times %}
+            <option value="{{time.id}}">{{time.get_time_in_day_display}}</option>
+        {% endfor %}
+    </select>
+    <div class="inline-error" id="book_time_error"></div>
+    <select name="service" id="serviceForm">
+        {% for service in services %}
+            <option value="{{service.id}}">{{service.name}}</option>
+        {% endfor %}
+    </select>
+    <div class="inline-error" id="requested_services_error"></div>
+    <div class="footer">
+        <div class="info"></div>
+        <div class="buttons">
+            <button class="cbutton green-hover" onclick="createReservation()">
+                <i class="fa fa-check"></i> ایجاد نوبت
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function createReservation() {
+        showGeneralLoading();
+        user = $('#userForm').val();
+        time = $('#timeForm').val();
+        service = $('#serviceForm').val();
+
+        $.ajax({
+            url: '/clinic/api/reservation/create/',
+            type: 'POST',
+            data: {
+                patient: user,
+                book_time: time,
+                requested_services: service,
+                csrfmiddlewaretoken: '{{csrf_token}}',
+            },
+            success: function (data) {
+                showSuccessMessage('نوبت با موفقیت ایجاد شد.');
+                reloadPageIn(1000);
+            },
+            error: function (data) {
+                for (let error in data.responseJSON.errors) {
+                    $('#' + error + '_error').html(data.responseJSON.errors[error][0]);
+                }
+            },
+            complete: function () {
+                hideGeneralLoading();
+            }
+        });
+    }
+
+    function reloadPageIn(time) {
+        setTimeout(function () {
+            window.location.reload();
+        }, time);
+    }
+</script>

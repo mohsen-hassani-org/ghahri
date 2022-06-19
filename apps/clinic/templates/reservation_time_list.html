@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load jalali_tags %}
+
+{% block extra_head %}
+    <style>
+        .book-time-container {
+
+        }
+
+        .book-time-container .header {
+
+        }
+
+        .book-time-container .header .title {
+
+        }
+
+        .book-time-container .header .date {
+
+        }
+
+        .book-time-container .body {
+
+        }
+
+        .book-time-container .body .row {
+            border-bottom: 5px solid transparent;
+            display: flex;
+        }
+
+        .book-time-container .body .row .date {
+            text-align: center;
+            padding: 20px;
+            background: lightgray;
+            font-size: x-large;
+            color: darkgray;
+            padding-top: 100px;
+            margin-left: 10px;
+        }
+
+        .book-time-container .body .row .time-list {
+            display: grid;
+            grid-column: auto;
+            width: 100%;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 10px;
+            margin: 10px 0px;
+        }
+
+        .book-time-container .body .row .time-list .time {
+            text-align: center;
+        }
+
+        .book-time-container .body .row .time-list .time h5 {
+            margin: 0px;
+        }
+
+        .book-time-container .body .row .time-list .time span {
+            font-size: x-small;
+        }
+
+        .selectable-box {
+            background-color: #eee;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .selectable-box:hover {
+            border: 2px solid var(--box-border-color);
+            background-color: var(--box-bg-color);
+        }
+        
+        .selectable-box.active {
+            color: white;
+            background-color: var(--box-border-color);
+            border: 2px solid var(--box-border-color);
+        }
+
+    </style>
+{% endblock extra_head %}
+
+
+{% block page_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="book-time-container">
+                <div class="header">
+                    <div class="title">
+                    </div>
+                    <div class="date">
+                    </div>
+                </div>
+                <div class="body">
+                    <div class="row">
+                        <div class="selectable-box" style="height: 50px; padding: 10px; font-size: large"
+                             id="selectAll" data-selected="false">
+                            انتخاب همه
+                        </div>
+                    </div>
+                    <hr />
+                    {% for date, book_time in book_times.items %}
+                        <div class="row">
+                            <div class="date selectable-box" id="{{date|date:'U' }}">{{ date|to_jalali:"%d" }}</div>
+                            <div class="time-list">
+                                {% for time in book_time %}
+                                    <div class="time selectable-box {%if not time.locked%}active{%endif%}" id="{{time.id}}" data-day="{{date|date:'U'}}">
+                                        <h5>{{time.time_in_day}}</h5>
+                                        <span>0 نوبت</span>
+                                    </div>
+                                {% endfor %} 
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="form">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="reservation_time_ids" id="reservationTimeIds" value="">
+                    <input type="submit" class="btn btn-primary" value="ثبت رزرو">
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock page_content %}
+
+
+{% block extra_scripts %}
+
+<script>
+    $(document).ready(function () {
+
+
+    });
+
+    $('.selectable-box.time').click(function () {
+        if($(this).hasClass('active')){
+            $(this).removeClass('active');
+        } else {
+            $(this).addClass('active');
+        }
+    });
+
+    $('.selectable-box.date').click(function () {
+        let date = $(this).attr('id');
+        if($(this).data('selected')){
+            $(this).data('selected', false);
+            $(`.selectable-box.time[data-day='${date}']`).removeClass('active');
+        } else {
+            $(this).data('selected', true);
+            $(`.selectable-box.time[data-day='${date}']`).addClass('active');
+        }
+    });
+
+    $('#selectAll').click(function () {
+        if($(this).data('selected')){
+            $(this).data('selected', false);
+            $('.selectable-box.date').data('selected', false);
+            $('.selectable-box.time').removeClass('active');
+        } else {
+            $(this).data('selected', true);
+            $('.selectable-box.date').data('selected', true);
+            $('.selectable-box.time').addClass('active');
+        }
+    });
+
+    $("input[type='submit']").click(function (e) {
+        e.preventDefault();
+        let reservationTimeIds = getSelectedTimeIds();
+        $('#reservationTimeIds').val(reservationTimeIds.join(','));
+        $('form').submit();
+    });
+
+    function getSelectedTimeIds() {
+        return $(".selectable-box.time.active").map(function () {
+            return $(this).attr("id");
+        }).get();
+    }
+
+    function setSeletecTimeIds() {
+        var ids = ['68', '82', '98', '112', '117', '126', '132', '160', '174'];
+        for (var i = 0; i < ids.length; i++) {
+            $("#" + ids[i]).addClass('active');
+        }
+    }
+</script>
+
+{% endblock extra_scripts %}

@@ -13,6 +13,9 @@ django-jalali-date = "*"
 pillow = "*"
 django-filter = "*"
 django-imagekit = "*"
+requests = "*"
+django-rest-framework = "*"
+django-decouple = "*"
 
 [dev-packages]
 

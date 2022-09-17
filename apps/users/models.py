@@ -1,13 +1,20 @@
-from time import perf_counter
+import random
+from datetime import timedelta
+from uuid import uuid4
 from django.templatetags.static import static
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.utils import timezone
 from django.urls import reverse
 from apps.core.models import AbstractModel
 from apps.core.utils import generate_random_string
+from apps.sms.interface import SMSInterface
 from .validators import MobileValidator, NationalCodeValidator
 from .managers import CustomUserManager
 
+def onehour_from_now():
+    return timezone.now() + timedelta(minutes=60)
 
 def generate_referral():
     code = generate_random_string(use_lower=False, use_symbols=False, length=8)
@@ -167,32 +174,34 @@ class Referral(AbstractModel):
 
 
 
-# class AuthSMSRequest(models.Model):
-#     class Meta:
-#         verbose_name = 'درخواست احراز هویت پیامکی'
-#         verbose_name_plural = 'درخواست احراز هویت پیامکی'
-#         ordering = ('-id', )
+class AuthSMSRequest(AbstractModel):
+    class Meta:
+        verbose_name = 'درخواست احراز هویت پیامکی'
+        verbose_name_plural = 'درخواست احراز هویت پیامکی'
+        ordering = ('-id', )
 
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
-#                              verbose_name='کاربر', null=True, blank=True)
-#     mobile = models.CharField('موبایل', max_length=11, help_text=('نمونه: 09123456789'),
-#                               validators=[MobileValidator()])
-#     sms_code = models.CharField('کد پیامکی', max_length=5, null=True, blank=True)
-#     created_at = models.DateTimeField('تاریخ ثبت', auto_now_add=True)
-#     updated_at = models.DateTimeField('تاریخ بروزرسانی', auto_now=True)
+    class RequestStatuses(models.TextChoices):
+        PENDING = 'pending', 'در انتظار'
+        COMPLETED = 'completed', 'پایان یافته'
 
-#     def __str__(self):
-#         return self.mobile
+    mobile = models.CharField('موبایل', max_length=11, help_text='مثلا 09123456789', validators=[MobileValidator()])
+    sms_code = models.CharField('کد پیامکی', max_length=5, null=True, blank=True)
+    expire_datetime = models.DateTimeField(default=onehour_from_now)
+    request_status = models.CharField(max_length=10, choices=RequestStatuses.choices, default=RequestStatuses.PENDING)
+    uuid = models.UUIDField(default=uuid4, editable=False)
 
-#     def login_user(self, request):
-#         user = self.user
-#         if not user:
-#             return
-#         login(request, user)
+    def __str__(self):
+        return self.mobile + ' - ' + str(self.created_at)
 
-#     def generate_sms_code(self):
-#         self.sms_code = generate_sms_code()
-#         self.save()
+    def is_expired(self):
+        return timezone.now() > self.expire_datetime
 
-#     def send_code(self):
-#         print(f'>>>>>>>>>>>>>{self.sms_code}<<<<<<<<<<<<<<<')
+    def close_request(self):
+        self.request_status = self.RequestStatuses.COMPLETED
+        self.save()
+
+    def send_otp_code(self):
+        random_code = random.randint(100000, 999999)
+        self.sms_code = random_code
+        self.save()
+        SMSInterface.send_otp_code(self)

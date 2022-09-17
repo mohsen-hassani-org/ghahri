@@ -24,4 +24,5 @@ urlpatterns = [
     path('core/', include('apps.core.urls')),
     path('users/', include('apps.users.urls')),
     path('auth/', include('apps.users.auth_urls')),
+    path('api/', include('apps.clinic.api.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

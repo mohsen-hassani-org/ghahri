@@ -17,7 +17,7 @@ def getenv(key, default=None):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = getenv('SECRET_KEY', 'foobar')
-DEBUG = bool(getenv('DEBUG', default=0))
+DEBUG = bool(getenv('DEBUG', default=True))
 ALLOWED_HOSTS = getenv('ALLOWED_HOSTS', default='*').split(',')
 
 
@@ -35,6 +35,9 @@ THIRD_PARTY_APPS = [
     'jalali_date',
     'django_filters',
     'imagekit',
+    'rest_framework',
+    'rest_framework.authtoken',
+
 ]
 PROJECT_APPS = [
     'apps.core',

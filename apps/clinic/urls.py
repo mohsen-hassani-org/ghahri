@@ -1,7 +1,6 @@
 from xml.etree.ElementInclude import include
 from django.urls import path
 from .views import (BookTimeCreateView, ClinicView, BookTimeListView,
-                    QuickCreateReservationApiView, QuickCreatePatientApiView,
                     ReservationServiceCreateView, ReservationImageCreateView,
                     ReservationMedicineCreateView, ServiceListView,
                     BrandCompanyListView, BrandListView, MedicineListView,
@@ -14,7 +13,7 @@ from .views import (BookTimeCreateView, ClinicView, BookTimeListView,
 
 app_name = 'clinic'
 
-view_urlpatterns = [
+urlpatterns = [
     path('_book_time_create/', BookTimeCreateView.as_view(), name='book_time_create'),
     path('', ClinicView.as_view(), name='clinic'),
     path('book-times/', BookTimeListView.as_view(), name='book_time_list'),
@@ -39,10 +38,3 @@ view_urlpatterns = [
     path('medicines/new/', MedicineCreateView.as_view(), name='new_medicine'),
     path('medicines/<pk>/update/', MedicineUpdateView.as_view(), name='update_medicine'),
 ]
-
-api_urlpatterns = [
-    path('api/user/create/', QuickCreatePatientApiView.as_view(), name='api_user_create'),
-    path('api/reservation/create/', QuickCreateReservationApiView.as_view(), name='api_reservation_create'),
-]
-
-urlpatterns = view_urlpatterns + api_urlpatterns

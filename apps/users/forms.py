@@ -62,16 +62,18 @@ class UserForm(forms.ModelForm):
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'mobile', 'role', 'avatar']
+        # fields = ['first_name', 'last_name', 'mobile', 'role', 'avatar']
+        fields = ['first_name', 'last_name', 'role']
 
-    def clean_mobile(self):
-        mobile = self.cleaned_data['mobile']
-        mobile = utils.persian_digits_to_english(mobile)
-        return mobile
+    # def clean_mobile(self):
+    #     mobile = self.cleaned_data['mobile']
+    #     mobile = utils.persian_digits_to_english(mobile)
+    #     return mobile
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['role'].widget.choices = UserForm.remove_patient_from_roles(User.Roles.choices)
+        self.fields['role'].widget = forms.HiddenInput() 
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
  

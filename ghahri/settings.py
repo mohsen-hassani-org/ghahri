@@ -1,6 +1,8 @@
+from email.policy import default
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from decouple import config
 load_dotenv()
 
 
@@ -35,9 +37,7 @@ THIRD_PARTY_APPS = [
     'jalali_date',
     'django_filters',
     'imagekit',
-    'rest_framework',
-    'rest_framework.authtoken',
-
+    'rest_framework'
 ]
 PROJECT_APPS = [
     'apps.core',
@@ -158,6 +158,9 @@ JALALI_DATE_DEFAULTS = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = 'auth:get_phone'
+OTP_EXPIRE_MINUTES = 60
+KAVENEGAR_API=config('KAVENEGAR_API')
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default="http://localhost,http://127.0.0.1").split(',')
 
 try:
     from ghahri.local_settings import *

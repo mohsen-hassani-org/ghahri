@@ -1,3 +1,4 @@
 from django.contrib import admin
+from apps.sms.kavenegar.models import SmsHistory
 
-# Register your models here.
+admin.site.register(SmsHistory)

@@ -1,3 +1,4 @@
+from urllib import request
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
@@ -92,6 +93,12 @@ class UserUpdateView(UserCreateView, UpdateView):
     page_title = 'ویرایش کاربر'
     success_message = 'کاربر با موفقیت ویرایش شد.'
     form_class = UserUpdateForm
+
+    def get_success_url(self) -> str:
+        return reverse_lazy('clinic:clinic')
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.id)
 
 
 class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormView):

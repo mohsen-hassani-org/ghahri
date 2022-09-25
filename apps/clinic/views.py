@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import View, TemplateView, ListView, CreateView, UpdateView, DeleteView
@@ -20,6 +19,7 @@ from .forms import (
 
 
 User = get_user_model()
+
 
 class BookTimeCreateView(PermissionRequireMixin, View):
     permissions = [User.Roles.SECRETARY, User.Roles.DOCTOR, User.Roles.ADMIN]
@@ -113,33 +113,6 @@ class BookTimeListView(PermissionRequireMixin ,TemplateView):
         BookTime.objects.unlock_times(time_ids)
         messages.success(request, 'نوبت ها با موفقیت بروزرسانی شدند.')
         return redirect(reverse('clinic:book_time_list') + '?year=' + str(year) + '&month=' + str(month))
-
-
-       
-class QuickCreatePatientApiView(PermissionRequireMixin ,View):
-    permissions = [User.Roles.SECRETARY, User.Roles.DOCTOR, User.Roles.ADMIN]
-    def post(self, request, *args, **kwargs):
-        form = PatientQuickForm(request.POST)
-        if form.is_valid():
-            patient = form.save(commit=False)
-            patient.staff = request.user
-            patient.username = patient.mobile
-            patient.save()
-            return JsonResponse(status=200, data={'id': patient.id})
-        return JsonResponse(status=400, data={'errors': form.errors})
-
-
-class QuickCreateReservationApiView(PermissionRequireMixin ,View):
-    permissions = [User.Roles.SECRETARY, User.Roles.DOCTOR, User.Roles.ADMIN]
-    def post(self, request, *args, **kwargs):
-        form = ReservationQuickForm(request.POST)
-        if form.is_valid():
-            reservation = form.save()
-            reservation.staff = request.user
-            reservation.save()
-            return JsonResponse(status=200, data={'id': reservation.id})
-        return JsonResponse(status=400, data={'errors': form.errors})
-
 
 
 class ReservationServiceCreateView(CustomFormTemplateMixin, PermissionRequireMixin, CreateView):

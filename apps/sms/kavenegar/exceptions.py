@@ -1,0 +1,2 @@
+class KavenegarResponseException(Exception):
+    pass

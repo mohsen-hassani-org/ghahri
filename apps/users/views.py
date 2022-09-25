@@ -105,13 +105,13 @@ class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormV
     permissions = [User.Roles.DOCTOR, User.Roles.ADMIN]
     model = User
     form_class = UserSetPasswordForm
-    success_url = reverse_lazy('users:user_list')
+    success_url = reverse_lazy('clinic:clinic')
     success_message = 'رمز عبور با موفقیت بروزرسانی شد.'
     page_title = 'تغییر رمز عبور'
     
     def get_page_subtitle(self):
         user = self.get_object()
-        return user.get_full_name()
+        return user.get_full_name()      
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get('pk')
@@ -119,7 +119,7 @@ class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormV
     
     def form_valid(self, form):
         user = self.get_object()
-        user.set_password(form.cleaned_data['password'])
+        user.set_password(form.cleaned_data.get('password'))
         user.save()
         return super().form_valid(form)
 

@@ -79,6 +79,10 @@ class UserUpdateForm(forms.ModelForm):
  
         
 class UserSetPasswordForm(forms.ModelForm):
+    current_password = forms.CharField(
+        label='رمز عبور قبلی',
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
     password_confirm = forms.CharField(
         label='تکرار رمز عبور',
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
@@ -91,7 +95,15 @@ class UserSetPasswordForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['password', 'password_confirm']
+        fields = [ 'current_password', 'password', 'password_confirm']
+
+    def clean_old_password(self, *args, **kwargs):
+        old_password = self.cleaned_data.get('old_password')
+
+        if not old_password:
+            raise forms.ValidationError("You must enter your old password.")
+
+        return old_password
 
     def clean_password(self):
         password = self.cleaned_data.get('password')

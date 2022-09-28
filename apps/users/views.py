@@ -1,4 +1,5 @@
 from urllib import request
+from django.contrib.auth import update_session_auth_hash
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
@@ -102,7 +103,6 @@ class UserUpdateView(UserCreateView, UpdateView):
 
 
 class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormView):
-    permissions = [User.Roles.DOCTOR, User.Roles.ADMIN]
     model = User
     form_class = UserSetPasswordForm
     success_url = reverse_lazy('clinic:clinic')
@@ -119,7 +119,8 @@ class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormV
     
     def form_valid(self, form):
         user = self.get_object()
-        user.set_password(form.cleaned_data.get('password'))
+        user.set_password(form.cleaned_data['password'])
+        update_session_auth_hash(self.request, user)
         user.save()
         return super().form_valid(form)
 

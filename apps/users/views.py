@@ -108,6 +108,11 @@ class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormV
     success_url = reverse_lazy('clinic:clinic')
     success_message = 'رمز عبور با موفقیت بروزرسانی شد.'
     page_title = 'تغییر رمز عبور'
+
+    def get_form_kwargs(self):
+        kwargs = super(UserSetPasswordView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def get_page_subtitle(self):
         user = self.get_object()

@@ -94,18 +94,20 @@ class UserSetPasswordForm(forms.ModelForm):
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
     )
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(UserSetPasswordForm, self).__init__(*args, **kwargs)
+
     class Meta:
         model = User
         fields = ['current_password', 'password', 'password_confirm']
 
-    #   TypeError
     def clean_current_password(self):
         current_password = self.cleaned_data['current_password']
-        if not self.instance.check_password(current_password):
+        if not self.user.check_password(current_password):
             raise forms.ValidationError('رمز عبور مطابقت ندارد')
         else:
             return current_password
-
 
     def clean_password(self):
         password = self.cleaned_data.get('password')

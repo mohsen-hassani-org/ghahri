@@ -250,6 +250,16 @@
                                     <i class="fa fa-power-off" aria-hidden="true"></i>
                                 </a>
                             </li>
+                            <li>
+                                <a data-toggle="tooltip" data-placement="top" title="" href="{% url 'users:update_user' user.id %}" data-original-title="ویرایش پروفایل">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a data-toggle="tooltip" data-placement="top" title="" href="{% url 'users:set_password' user.id %}" data-original-title="ویرایش رمز عبور">
+                                    <i class="fa fa-key" aria-hidden="true"></i>
+                                </a>
+                            </li>
                        </ul>
                     </nav>
                 </div>

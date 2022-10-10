@@ -162,3 +162,7 @@ Thumbs.db
 .vscode/launch.json
 backups/
 .env
+
+.vscode
+backups/*
+.idea

@@ -1,3 +1,5 @@
+from urllib import request
+from django.contrib.auth import update_session_auth_hash
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
@@ -93,18 +95,28 @@ class UserUpdateView(UserCreateView, UpdateView):
     success_message = 'کاربر با موفقیت ویرایش شد.'
     form_class = UserUpdateForm
 
+    def get_success_url(self) -> str:
+        return reverse_lazy('clinic:clinic')
+
+    def get_queryset(self):
+        return User.objects.filter(pk=self.request.user.id)
+
 
 class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormView):
-    permissions = [User.Roles.DOCTOR, User.Roles.ADMIN]
     model = User
     form_class = UserSetPasswordForm
-    success_url = reverse_lazy('users:user_list')
+    success_url = reverse_lazy('clinic:clinic')
     success_message = 'رمز عبور با موفقیت بروزرسانی شد.'
     page_title = 'تغییر رمز عبور'
+
+    def get_form_kwargs(self):
+        kwargs = super(UserSetPasswordView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def get_page_subtitle(self):
         user = self.get_object()
-        return user.get_full_name()
+        return user.get_full_name()      
 
     def get_object(self, queryset=None):
         pk = self.kwargs.get('pk')
@@ -113,6 +125,7 @@ class UserSetPasswordView(CustomFormTemplateMixin, PermissionRequireMixin, FormV
     def form_valid(self, form):
         user = self.get_object()
         user.set_password(form.cleaned_data['password'])
+        update_session_auth_hash(self.request, user)
         user.save()
         return super().form_valid(form)
 

@@ -295,6 +295,7 @@ class WorkSample(models.Model):
         verbose_name = 'نمونه کار'
         verbose_name_plural = 'نمونه کار'
 
+    @property
     def duration(self):
         return self.end_time - self.start_time
 

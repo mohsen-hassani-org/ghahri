@@ -278,4 +278,26 @@ class ReservationMedicine(AbstractModel):
     def __str__(self):
         return f"{self.medicine.name}"
 
+
+class WorkSample(models.Model):
+    before_photo = models.ImageField(upload_to='gallery/', verbose_name='عکس قبل')
+    after_photo = models.ImageField(upload_to='gallery/', null=True, blank=True, verbose_name='عکس بعد')
+    full_name = models.CharField(max_length=100, null=True, blank=True, verbose_name='نام و نام خانوادگی')
+    service_name = models.ForeignKey(Service, on_delete=models.CASCADE, verbose_name='نام خدمت')
+    start_time = models.DateTimeField(verbose_name='شروع درمان')
+    end_time = models.DateTimeField(verbose_name='پایان درمان')
+    comment = models.TextField(null=True, blank=True, verbose_name='نظر بیمار')
+    is_published = models.BooleanField(default=False, verbose_name='منتشر شده')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='ایجاد شده در')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='ویرایش شده در')
+
+    class Meta:
+        verbose_name = 'نمونه کار'
+        verbose_name_plural = 'نمونه کار'
+
+    @property
+    def duration(self):
+        return self.end_time - self.start_time
+
+
     

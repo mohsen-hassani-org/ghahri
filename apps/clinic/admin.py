@@ -5,7 +5,7 @@ from jalali_date import date2jalali
 from .models import (Medicine, Illness, Service, BookTime,
                      ReservationService, Reservation,
                      ReservationMedicine, ImageGallery,
-                     BrandCompany, Brand,)
+                     BrandCompany, Brand, WorkSample, )
 
 
 @admin.register(Medicine)
@@ -109,3 +109,10 @@ class ImageGalleryAdmin(admin.ModelAdmin):
     list_display = ('user', 'description', 'capture_time', 'reservation')
     search_fields = ('user', 'description', 'capture_time', 'reservation')
     list_filter = ('user', 'description', 'capture_time', 'reservation')
+
+
+@admin.register(WorkSample)
+class WorkSample(admin.ModelAdmin):
+    list_display = ('full_name', 'service_name', 'is_published')
+    search_fields = ('full_name', 'service_name',)
+    list_filter = ('full_name', 'service_name', 'is_published')

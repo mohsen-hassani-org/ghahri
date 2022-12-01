@@ -74,9 +74,8 @@ class ConfirmMobileViewSet(GenericViewSet, CreateModelMixin):
         return get_object_or_404(AuthSMSRequest, uuid=uuid)
 
 
-class WorkSampleApiView(PermissionRequireMixin, APIView):
-    permissions = [User.Roles.SECRETARY, User.Roles.DOCTOR, User.Roles.ADMIN, User.Roles.PATIENT]
-
+class WorkSampleApiView(APIView):
+    permission_classes = (AllowAny,)
     def get(self, request):
         work_sample = WorkSample.objects.filter(is_published=True).values_list()
-        return Response(data={'model_to_reeturn':list(work_sample)}, status=status.HTTP_200_OK)
+        return Response(data={'work_sample':list(work_sample)}, status=status.HTTP_200_OK)
